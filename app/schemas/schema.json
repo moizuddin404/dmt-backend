@@ -1,0 +1,43 @@
+{
+  "hospital": [
+    "hospital_name",
+    "hospital_address"
+  ],
+  "patient": [
+    "first_name",
+    "last_name",
+    "date_of_birth",
+    "gender",
+    "phone",
+    "email",
+    "address",
+    "country"
+  ],
+  "medical_condition": [
+    "condition_name"
+  ],
+  "family_history": [
+    "relative"
+  ],
+  "diagnosis": [
+    "diagnosis_date"
+  ],
+  "treatment": [
+    "treatment_type",
+    "start_date",
+    "end_date",
+    "outcome"
+  ],
+  "lifestyle": [
+    "smoking_status",
+    "alcohol_use",
+    "exercise_habit",
+    "diet"
+  ],
+  "lab_result": [
+    "test_name",
+    "test_value",
+    "unit",
+    "test_date"
+  ]
+}

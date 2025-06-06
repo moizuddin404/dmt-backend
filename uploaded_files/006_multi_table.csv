@@ -1,0 +1,3 @@
+first_name,last_name,date_of_birth,gender,phone,disease,treatment_name,lab_test,result
+Mark,Lee,1980-03-15,Male,1112223333,Hypertension,Medication A,Blood Pressure,140/90
+Anna,Kim,1975-08-10,Female,4445556666,High Cholesterol,Medication B,Cholesterol,250

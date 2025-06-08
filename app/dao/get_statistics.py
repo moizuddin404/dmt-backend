@@ -6,6 +6,9 @@ from app.models.core import FileUploadLog
 
 class FileStatistics:
     def get_file_logs(self, db: Session):
+        """
+        Description: Getting File statistics for file management component
+        """
         logs = db.query(FileUploadLog).order_by(FileUploadLog.upload_time.desc()).all()
         return [
             {

@@ -22,7 +22,6 @@ def extract_value(row: dict, col_info):
 def insert_data_to_tables(mapping: dict, sample_data: list, db: Session, file_id: int):
     try:
         for row in sample_data:
-            # --- Hospital ---
             hospital_mapping = mapping.get("hospital", {})
             hospital_data = {
                 attr: extract_value(row, col_info)
@@ -41,7 +40,6 @@ def insert_data_to_tables(mapping: dict, sample_data: list, db: Session, file_id
                     db.add(hospital)
                     db.flush()
 
-            # --- Patient ---
             patient_mapping = mapping.get("patient", {})
             patient_data = {
                 attr: extract_value(row, col_info)
@@ -56,7 +54,6 @@ def insert_data_to_tables(mapping: dict, sample_data: list, db: Session, file_id
             db.add(patient)
             db.flush()
 
-            # --- Lifestyle ---
             lifestyle_mapping = mapping.get("lifestyle", {})
             lifestyle_data = {
                 attr: extract_value(row, col_info)
@@ -69,7 +66,6 @@ def insert_data_to_tables(mapping: dict, sample_data: list, db: Session, file_id
                 lifestyle = Lifestyle(**filter_valid_columns(Lifestyle, lifestyle_data))
                 db.add(lifestyle)
 
-            # --- Lab Result ---
             lab_mapping = mapping.get("lab_result", {})
             lab_data = {}
             for attr, col_info in lab_mapping.items():
@@ -84,7 +80,6 @@ def insert_data_to_tables(mapping: dict, sample_data: list, db: Session, file_id
                 lab_result = LabResult(**filter_valid_columns(LabResult, lab_data))
                 db.add(lab_result)
 
-            # --- Treatment ---
             treatment_mapping = mapping.get("treatment", {})
             treatment_data = {}
             for attr, col_info in treatment_mapping.items():
@@ -99,7 +94,6 @@ def insert_data_to_tables(mapping: dict, sample_data: list, db: Session, file_id
                 treatment = Treatment(**filter_valid_columns(Treatment, treatment_data))
                 db.add(treatment)
 
-            # --- Diagnosis ---
             diagnosis_mapping = mapping.get("diagnosis", {})
             diagnosis_data = {}
             for attr, col_info in diagnosis_mapping.items():
@@ -124,7 +118,6 @@ def insert_data_to_tables(mapping: dict, sample_data: list, db: Session, file_id
                 diagnosis = Diagnosis(**filter_valid_columns(Diagnosis, diagnosis_data))
                 db.add(diagnosis)
 
-            # --- Family History ---
             history_mapping = mapping.get("family_history", {})
             history_data = {}
             for attr, col_info in history_mapping.items():
@@ -142,7 +135,6 @@ def insert_data_to_tables(mapping: dict, sample_data: list, db: Session, file_id
                 family_history = FamilyHistory(**filter_valid_columns(FamilyHistory, history_data))
                 db.add(family_history)
 
-            # --- Patient Conditions ---
             pc_mapping = (
                 mapping.get("medical_condition")
                 or mapping.get("diagnosis")

@@ -11,5 +11,4 @@ def get_expected_columns(schema: dict):
     expected_cols = []
     for table, columns in schema.items():
         expected_cols.extend(columns)
-    # Remove duplicates just in case
     return list(set(expected_cols))

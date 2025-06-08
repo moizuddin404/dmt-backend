@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from .config import Config
 from fastapi.middleware.cors import CORSMiddleware
-from .routes import router
+from .routes import router, dashboard_router
 
 config = Config()
 app = FastAPI()
@@ -16,6 +16,7 @@ app.add_middleware(
 )
 
 app.include_router(router, prefix="/file")
+app.include_router(dashboard_router, prefix="/dashboard")
 
 @app.get("/")
 def home():

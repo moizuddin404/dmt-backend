@@ -9,7 +9,7 @@ import csv
 
 from app.database.deps import get_db
 from app.services import file_service
-from app.dao import file_statistics
+from app.dao import file_statistics, fetch_full_database_data
 from app.models.core import (
     Patient, Hospital, Lifestyle, LabResult,
     Treatment, Diagnosis, FamilyHistory, Condition, patient_conditions
@@ -37,13 +37,23 @@ async def preview_file(filename: str):
         raise HTTPException(status_code=404, detail="File not found")
 
     mime_type, _ = mimetypes.guess_type(str(file_path))
-    return FileResponse(file_path, media_type=mime_type or "application/octet-stream", filename=safe_filename)
+    return FileResponse(
+        path=file_path,
+        media_type=mime_type or "application/octet-stream",
+        filename=safe_filename
+    )
+
+@router.get("/data/all")
+def get_full_database_data(db: Session = Depends(get_db)):
+    data = fetch_full_database_data(db)
+    if not data or not any(data.values()):
+        raise HTTPException(status_code=404, detail="No data available in the database.")
+    return data
 
 @router.get("/data/{file_id}")
 def get_data_by_file(file_id: int, db: Session = Depends(get_db)):
     result = {}
 
-    # Step 1: Fetch patient records
     patients = db.query(Patient).filter(Patient.file_id == file_id).all()
     if not patients:
         raise HTTPException(status_code=404, detail="No data found for this file ID")
@@ -51,7 +61,6 @@ def get_data_by_file(file_id: int, db: Session = Depends(get_db)):
     patient_ids = [p.patient_id for p in patients]
     hospital_ids = {p.hospital_id for p in patients if p.hospital_id}
 
-    # Step 2: Fetch hospital info and attach to patient
     hospitals = db.query(Hospital).filter(Hospital.hospital_id.in_(hospital_ids)).all()
     hospital_map = {h.hospital_id: h for h in hospitals}
 
@@ -65,16 +74,18 @@ def get_data_by_file(file_id: int, db: Session = Depends(get_db)):
 
     result["patient"] = enriched_patients
 
-    # Step 3: Fetch and enrich related tables
     def fetch_related(model, enrich_condition=False):
         records = db.query(model).filter(model.patient_id.in_(patient_ids)).all()
         enriched = []
         for r in records:
             r_data = r.__dict__.copy()
+
             if enrich_condition and r_data.get("condition_id"):
                 cond = db.query(Condition).filter_by(condition_id=r_data["condition_id"]).first()
                 if cond:
-                    r_data["condition"] = cond.__dict__
+                    r_data["condition_name"] = cond.condition_name
+                r_data.pop("condition_id", None)
+
             r_data.pop("_sa_instance_state", None)
             enriched.append(r_data)
         return enriched
@@ -96,30 +107,6 @@ def get_data_by_file(file_id: int, db: Session = Depends(get_db)):
         table_data = fetch_related(model, enrich_condition=enrich)
         if table_data:
             result[name] = table_data
-
-    # Step 4: Patient conditions from junction table
-    stmt = select(
-        patient_conditions.c.patient_id,
-        patient_conditions.c.condition_id
-    ).where(patient_conditions.c.patient_id.in_(patient_ids))
-
-    patient_condition_rows = db.execute(stmt).fetchall()
-    condition_ids = {row.condition_id for row in patient_condition_rows}
-
-    if condition_ids:
-        conditions = db.query(Condition).filter(Condition.condition_id.in_(condition_ids)).all()
-        cond_map = {c.condition_id: c.__dict__ for c in conditions}
-
-        enriched_pc = []
-        for row in patient_condition_rows:
-            row_dict = {
-                "patient_id": row.patient_id,
-                "condition_id": row.condition_id,
-                "condition": cond_map.get(row.condition_id)
-            }
-            enriched_pc.append(row_dict)
-
-        result["patient_condition"] = enriched_pc
 
     return result
 

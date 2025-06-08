@@ -201,5 +201,4 @@ async def generate_table_mapping(headers: List[str], sample_data: List[dict]) ->
 
     except Exception as e:
         print(f"Error generating or parsing Gemini response: {e}")
-        # print(f"Raw response: {getattr(response, 'text', 'No response text available')}")
         raise
